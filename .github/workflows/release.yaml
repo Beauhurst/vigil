@@ -1,13 +1,15 @@
-name: Tag & Pre-Release
+name: Tag & Make Release PR
 
 on:
-  push:
+  pull_request:
+    types:
+      - "closed"
     branches:
-      - "prerelease-*"
-      - "pre-release-*"
+      - "main"
 
 jobs:
-  build_and_pre_release:
+  build_and_release:
+    if: github.event.pull_request.merged == true && !startsWith(github.head_ref, 'release')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -33,28 +35,26 @@ jobs:
           git config user.name "Release Bot"
           git config user.email "dev@beauhurst.com"
 
-      - name: Create Pre-Release
+      - name: Create Release
         id: version
         run: |
-          just pre-release
+          just release
           echo "VERSION=$(just --evaluate current_version)" >>$GITHUB_OUTPUT
 
-      - name: Push version & tag to repository
+      - name: Create release branch, push branch, tag and create PR
         env:
           TAG_NAME: "v${{ steps.version.outputs.VERSION }}"
+          BRANCH_NAME: "release-v${{ steps.version.outputs.VERSION }}"
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git push
+
+          git checkout -b "$BRANCH_NAME"
+          git push origin "$BRANCH_NAME"
           git push origin tag "$TAG_NAME"
 
-      - name: Create a GitHub Release
-        uses: softprops/action-gh-release@v2.5.0
-        with:
-          prerelease: true
-          token: ${{ secrets.GITHUB_TOKEN }}
-          generate_release_notes: true
-          files: "./dist/vigilia*"
-          make_latest: false
-          tag_name: ${{ steps.version.outputs.VERSION }}
-
-      - name: Publish
-        run: uv publish
+          # create release PR
+          gh pr create \
+            --title "Release $TAG_NAME" \
+            --head "$(git branch --show-current)" \
+            --fill \
+            --base main
