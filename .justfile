@@ -37,7 +37,7 @@ build:
   uv build --package vigilia --out-dir dist
 
 [group('release')]
-create-release: && build
+pre-release: && build
   #!/usr/bin/env sh
   if [ "{{_is_current_dev}}" == 'true' ]; then
     # 2024.9.1-dev0 -> 2024.9.1-dev1
