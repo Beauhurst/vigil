@@ -28,7 +28,7 @@ jobs:
 
       - name: Install the project
         run: |
-          uv sync
+          uv sync --frozen
 
       - name: Config Git
         run: |
