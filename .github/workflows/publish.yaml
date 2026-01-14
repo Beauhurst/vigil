@@ -1,4 +1,7 @@
-name: Tag & Make Release PR
+name: Release
+
+permissions:
+  id-token: write
 
 on:
   push:

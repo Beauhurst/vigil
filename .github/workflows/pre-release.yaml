@@ -1,5 +1,8 @@
 name: Tag & Pre-Release
 
+permissions:
+  id-token: write
+
 on:
   push:
     branches:
