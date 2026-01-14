@@ -1,5 +1,9 @@
 name: Tag & Pre-Release
 
+permissions:
+  id-token: write
+  contents: write
+
 on:
   push:
     branches:
@@ -26,7 +30,7 @@ jobs:
 
       - name: Install the project
         run: |
-          uv sync
+          uv sync --frozen
 
       - name: Config Git
         run: |

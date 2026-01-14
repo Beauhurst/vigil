@@ -1,4 +1,7 @@
-name: Tag & Make Release PR
+name: Release
+
+permissions:
+  id-token: write
 
 on:
   push:
@@ -25,7 +28,7 @@ jobs:
 
       - name: Install the project
         run: |
-          uv sync
+          uv sync --frozen
 
       - name: Build Release
         id: version
