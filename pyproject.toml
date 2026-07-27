@@ -1,0 +1,133 @@
+[project]
+name = "vigilia"
+version = "2026.1.4-dev1"
+description = "A CLI tool for generating technical summaries of code changes using LLMs"
+readme = "README.md"
+authors = [
+    { name = "Alejandro Giacometti", email = "alejandro.giacometti@beauhurst.com" },
+]
+requires-python = ">=3.13"
+dependencies = [
+    "pydantic-ai>=1.40.0",
+    "pygit2>=1.19.1",
+    "rich>=14.2.0",
+    "rustworkx>=0.17.1",
+    "tiktoken>=0.12.0",
+    "typer>=0.21.1",
+]
+
+[project.scripts]
+vigilia = "vigilia:main"
+
+[build-system]
+requires = ["uv_build>=0.9.21,<0.10.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "mypy>=1.19.1",
+    "pytest>=9.0.2",
+    "pytest-cov>=7.0.0",
+    "pytest-mock>=3.15.1",
+    "ruff>=0.14.10",
+]
+
+[tool.ruff]
+target-version = "py313"
+src = ["src/"]
+
+[tool.ruff.lint]
+select = [
+    "B",
+    "C4",
+    "COM819",
+    "E",
+    "F",
+    "I",
+    "NPY",
+    "PD",
+    "PT",
+    "Q",
+    "RUF",
+    "SIM",
+    "UP",
+    "W",
+
+]
+ignore = ["E501"]
+# Avoid trying to fix flake8-bugbear (`B`) violations.
+unfixable = ["B"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 12
+
+[tool.ruff.lint.flake8-quotes]
+docstring-quotes = "double"
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = ["typer.Argument", "typer.Option"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.mypy]
+disallow_incomplete_defs = true
+disallow_untyped_calls = true
+disallow_untyped_defs = true
+show_error_codes = true
+warn_redundant_casts = true
+warn_unused_configs = true
+follow_imports = "normal"
+packages = ["vigilia"]
+
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "--cov --strict-markers"
+testpaths = ["src/tests"]
+markers = ["api: marks tests as api (deselect with '-m \"not api\"')"]
+
+[tool.coverage.run]
+branch = true
+omit = ["src/tests/*"]
+
+[tool.coverage.report]
+show_missing = true
+
+[tool.bumpversion]
+current_version = "2026.1.4-dev1"
+parse = """(?x)                     # Verbose mode
+    (?P<release>                    # The release part
+        (?:[1-9][0-9]{3})\\.        # YYYY.
+        (?:1[0-2]|[1-9])            # MM.
+    )
+    \\.(?P<num>0|[1-9]\\d*)    # num version number
+    (?:
+         -(?P<pre_label>dev|stable)     # pre_release label
+        (?P<pre_release>0|[1-9]\\d*)    # pre_release version number
+    )?
+"""
+serialize = ["{release}.{num}-{pre_label}{pre_release}", "{release}.{num}"]
+search = "{current_version}"
+replace = "{new_version}"
+tag = true
+tag_name = "v{new_version}"
+tag_message = "v{new_version}"
+commit = true
+message = "v{new_version}"
+
+[tool.bumpversion.parts.release]
+calver_format = "{YYYY}.{MM}"
+
+[tool.bumpversion.parts.num]
+independent = false
+
+[tool.bumpversion.parts.pre_label]
+optional_value = "stable"
+values = ["dev", "stable"]
+
+[[tool.bumpversion.files]]
+glob = "**/pyproject.toml"

@@ -1,0 +1,64 @@
+name: Tag & Pre-Release
+
+permissions:
+  id-token: write
+  contents: write
+
+on:
+  push:
+    branches:
+      - "prerelease-*"
+      - "pre-release-*"
+
+jobs:
+  build_and_pre_release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: extractions/setup-just@v3
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+
+      - name: "Set up Python"
+        uses: actions/setup-python@v6
+        with:
+          python-version-file: ".python-version"
+
+      - name: Install the project
+        run: |
+          uv sync --frozen
+
+      - name: Config Git
+        run: |
+          git config user.name "Release Bot"
+          git config user.email "dev@beauhurst.com"
+
+      - name: Create Pre-Release
+        id: version
+        run: |
+          just pre-release
+          echo "VERSION=$(just --evaluate current_version)" >>$GITHUB_OUTPUT
+
+      - name: Push version & tag to repository
+        env:
+          TAG_NAME: "v${{ steps.version.outputs.VERSION }}"
+        run: |
+          git push
+          git push origin tag "$TAG_NAME"
+
+      - name: Create a GitHub Release
+        uses: softprops/action-gh-release@v2.5.0
+        with:
+          prerelease: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          generate_release_notes: true
+          files: "./dist/vigilia*"
+          make_latest: false
+          tag_name: ${{ steps.version.outputs.VERSION }}
+
+      - name: Publish
+        run: uv publish

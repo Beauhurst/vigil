@@ -1,0 +1,37 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+
+
+# VSCode settings:
+.vscode
+
+# pycharm
+.idea/
+
+# osx crap
+.DS_Store
+
+# local conda env
+.envrc
+.env.yml
+.venv
+.direnv
+
+# testing
+.coverage
+.mypy_cache
+.pytest_cache
+.ruff_cache
+cov-append*
+
+# temporary files
+tmp/
+
+# output
+out/
+dist/
+
+# aider
+.aider*
+LOCAL_CONVENTIONS.md
